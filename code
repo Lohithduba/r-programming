@@ -1,0 +1,78 @@
+title: "COVID Cases"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE)
+library(flexdashboard)
+library(readxl)
+library(ggplot2)
+library(dplyr)
+library(scales)  
+
+```
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### New CASES MONTHWISE
+```{r}
+library(readxl)
+library(ggplot2)
+library(dplyr)
+library(scales)
+COVID_data <- read_excel("C:/Users/lohith/Downloads/COVID-CasesDeathsHosp(Europe and Americas) (1).xlsx")
+
+COVID_data$month <- as.Date(cut(COVID_data$Date, breaks = 'month'))
+COVID_dataUK <- COVID_data %>% filter(Location == "United Kingdom")
+
+COVID_dataUKgrouped <- COVID_dataUK %>% 
+  group_by ( month ) %>% 
+  summarize( sum ( NewCases ) ) %>% 
+  select( month, "NewCases" = "sum(NewCases)" )
+
+# Line Graph result with grouping month and year with summing of new cases
+
+COVID_dataUKgrouped %>%
+  ggplot(aes(x = "", y = NewCases, fill = factor(month))) +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar("y", start=0) +
+  theme_void() +
+  theme(legend.position = "right") +
+  labs(x = NULL, y = NULL, fill = "Month", title = "New Cases by Month")
+
+```
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+###  New Cases Daywise
+
+```{r}
+library(readxl)
+library(ggplot2)
+library(dplyr)
+library(scales)
+COVID_data <- read_excel("C:/Users/lohith/Downloads/COVID-CasesDeathsHosp(Europe and Americas) (1).xlsx")
+# Create a column to show month and year
+COVID_data$month <-
+  as.Date(cut(COVID_data$Date, breaks = 'month'))
+
+COVID_data %>%
+  filter(Location == "United Kingdom") %>%
+
+  # Bar plot - Sum of Cases in the UK by Month & Year with x & y axis formatting
+ggplot(aes(x = month, y = NewCases)) +
+  geom_col(aes(fill = month)) +
+  scale_y_continuous(labels = comma, breaks = seq(0, 1800000, 100000)) +
+  scale_x_date(date_labels = "%b-%y" , breaks = "1 month") +
+  theme_minimal() + # or theme_bw()
+  theme(axis.text.x = element_text(size = 10, angle = 90)) +
+  labs(x = "Date", y = "New Cases")
+
+
+```
+
+
